@@ -2,20 +2,15 @@ use std::sync::mpsc;
    use std::thread;
 //mod piston_example;
 mod detector;
+mod backup;
 
 fn main() {
 
-    //piston_example::run();
    // Initialize the mpsc channel
-   let (tx, rx) = mpsc::channel();
-
-   // Create Detector thread with sender
-   // let detector_handle = thread::spawn(move || {
-   //     detector::run(tx);
-   // });
+   //let (tx, rx) = mpsc::channel();
 
    // Use Detector with main thread
-   detector::run(tx);
+   //detector::run(tx);
 
    // while let Ok(received) = rx.recv() {
    //    println!("sono nel for del receiver");
@@ -26,6 +21,8 @@ fn main() {
    //       _ => println!("Errore sconosciuto"),
    //    }
    // }
+
+   backup::run();
 
    // // Create Logger thread (no arguments needed)
    // let logger_handle = thread::spawn(|| {
