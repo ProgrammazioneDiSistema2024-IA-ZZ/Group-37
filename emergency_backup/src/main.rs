@@ -1,7 +1,11 @@
 use std::sync::mpsc;
 use std::thread;
+//mod piston_example;
+mod detector;
 
 fn main() {
+    detector::run();
+    //piston_example::run();
    // // Initialize the mpsc channel
    // // let (tx, rx) = mpsc::channel();
 
