@@ -1,3 +1,4 @@
 emergency_backup/target
 emergency_backup/Cargo.lock
 .vs/
+.idea
