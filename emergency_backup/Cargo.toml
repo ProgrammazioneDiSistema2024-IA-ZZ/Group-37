@@ -7,7 +7,8 @@ edition = "2021"
 
 [dependencies]
 rdev = "0.5"
+piston_window = "0.107.0"
 
 [lib]
 name = "emergency_backup"
-path = "src/lib.rs"
+path = "src/detector.rs"
