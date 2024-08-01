@@ -7,13 +7,13 @@ fn main() {
    // Initialize the mpsc channel
    let (tx, rx) = mpsc::channel();
 
-   // Creo un thread
+   // Creo un thread per backup
    let backup_handle = thread::spawn(move || {
       while let Ok(received) = rx.recv() {
          println!("Sono nel receiver");
          match received {
             1 => println!("Rettangolo riconosciuto"),
-            2 => backup::open_window(),
+            2 => backup::backup(),
             0 => println!("Forma non riconosciuta"),
             _ => println!("Errore sconosciuto"),
          }
@@ -25,9 +25,6 @@ fn main() {
 
    // Ensure the backup thread has finished
    backup_handle.join().unwrap();
-
-
-
 
    // // Create Logger thread (no arguments needed)
    // let logger_handle = thread::spawn(|| {
