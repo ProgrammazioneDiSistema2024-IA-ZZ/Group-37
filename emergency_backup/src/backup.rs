@@ -83,7 +83,6 @@ fn save_source_info(path: &str, file_type: &str) {
 }
 
 fn read_source_info() -> (Option<PathBuf>, String) {
-    println!("Sto cercando di aprire il file source info");
     if let Ok(info_str) = fs::read_to_string("assets/source_info.txt") {
         let mut lines = info_str.lines();
         let path_str = lines.next().unwrap_or("").trim();
@@ -93,7 +92,6 @@ fn read_source_info() -> (Option<PathBuf>, String) {
         let file_type = lines.next().unwrap_or("All types").to_string();
         (Some(PathBuf::from(path_str)), file_type)
     } else {
-        println!("Non ho trovato il file");
         (None, "All types".to_string())
     }
 }
@@ -208,6 +206,14 @@ fn perform_backup() {
         let source_path = source_path.unwrap();
         let destination = device.join(source_path.file_name().unwrap());
 
+        // Verifica se la directory di destinazione esiste, altrimenti creala
+        if !destination.exists() {
+            if let Err(e) = fs::create_dir_all(&destination) {
+                eprintln!("Errore nella creazione della directory di destinazione: {}", e);
+                return;
+            }
+        }
+
         for entry in WalkDir::new(source_path.clone()) {
             let entry = entry.unwrap();
             let path = entry.path();
@@ -223,7 +229,6 @@ fn perform_backup() {
             println!("Destinazione: {:?}", dest_path);
 
             if entry.file_type().is_dir() {
-                println!("creato la cartella");
                 fs::create_dir_all(&dest_path).unwrap();
             } else {
                 let mut src_file = File::open(entry.path()).unwrap();
@@ -249,6 +254,7 @@ pub fn open_window() {
         Box::new(|_cc| Ok(Box::new(MyApp::default()))),
     );
 }
+
 pub fn backup() {
     perform_backup();
 }
