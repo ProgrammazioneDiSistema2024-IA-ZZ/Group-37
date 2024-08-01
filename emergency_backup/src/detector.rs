@@ -1,6 +1,6 @@
 extern crate piston_window;
-use std::sync::mpsc::{Sender};
 use piston_window::*;
+use std::sync::mpsc::Sender;
 
 pub fn run(tx: Sender<i32>) {
     let mut window: PistonWindow = WindowSettings::new("Disegna un segno meno o un rettangolo", [800, 600])
@@ -39,8 +39,8 @@ pub fn run(tx: Sender<i32>) {
             // Send the result through the channel
             if tx.send(result).is_err() {
                 eprintln!("Errore nell'invio del risultato");
-            } else{
-                println!("inviato");
+            } else {
+                println!("Inviato");
             }
 
             lines.clear();
@@ -72,8 +72,6 @@ fn check_minus_sign(lines: &[[f64; 2]]) -> bool {
     let x2 = last_point[0];
     let y1 = lines[0][1];
     let y2 = last_point[1];
-    //println!("x1: {}, x2: {}", x1, x2);
-    //println!("y1: {}, y2: {}", y1, y2);
 
     // Check if the line is approximately horizontal
     let is_horizontal = (y1 - y2).abs() < 100.0;
@@ -108,4 +106,3 @@ fn check_rectangle(points: &[[f64; 2]], window_size: [f64; 2]) -> bool {
 
     on_left && on_right && on_top && on_bottom
 }
-

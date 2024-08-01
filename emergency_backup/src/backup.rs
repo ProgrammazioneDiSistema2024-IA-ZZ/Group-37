@@ -1,4 +1,5 @@
 use eframe::egui;
+use std::collections::HashSet;
 use std::fs::{self, File};
 use std::io::{Write, copy};
 use std::path::{PathBuf, Path};
@@ -8,13 +9,24 @@ use rfd::FileDialog; // Per la selezione di file e directory
 
 struct MyApp {
     source_path: Option<PathBuf>,
+    file_type: String,
+    file_types: Vec<String>,
     exit_requested: bool,
 }
 
 impl Default for MyApp {
     fn default() -> Self {
+        let (source_path, file_type) = read_source_info();
+        let file_types = if let Some(ref path) = source_path {
+            get_file_extensions(path)
+        } else {
+            vec!["All types".to_string()]
+        };
+
         Self {
-            source_path: None,
+            source_path,
+            file_type,
+            file_types,
             exit_requested: false,
         }
     }
@@ -33,8 +45,9 @@ impl eframe::App for MyApp {
             if ui.button("Choose Directory").clicked() {
                 // Apri una finestra di selezione della directory
                 if let Some(path) = FileDialog::new().pick_folder() {
-                    self.source_path = Some(path);
-                    save_source_path(&self.source_path.as_ref().unwrap().to_string_lossy());
+                    self.source_path = Some(path.clone());
+                    self.file_types = get_file_extensions(&path);
+                    save_source_info(&path.to_string_lossy(), &self.file_type);
                 }
             }
 
@@ -44,6 +57,19 @@ impl eframe::App for MyApp {
                 ui.label("No directory selected.");
             }
 
+            ui.label("Select file type:");
+            egui::ComboBox::from_label("")
+                .selected_text(&self.file_type)
+                .show_ui(ui, |ui| {
+                    for file_type in &self.file_types {
+                        ui.selectable_value(&mut self.file_type, file_type.clone(), file_type);
+                    }
+                });
+
+            if self.source_path.is_some() {
+                save_source_info(&self.source_path.as_ref().unwrap().to_string_lossy(), &self.file_type);
+            }
+
             if ui.button("Exit").clicked() {
                 self.exit_requested = true; // Segnala che l'uscita è richiesta
             }
@@ -51,14 +77,41 @@ impl eframe::App for MyApp {
     }
 }
 
-fn save_source_path(path: &str) {
-    let mut file = File::create("assets/source_path.txt").expect("Unable to create file");
-    file.write_all(path.as_bytes()).expect("Unable to write data");
+fn save_source_info(path: &str, file_type: &str) {
+    let mut file = File::create("assets/source_info.txt").expect("Unable to create file");
+    file.write_all(format!("{}\n{}", path, file_type).as_bytes()).expect("Unable to write data");
 }
 
-fn read_source_path() -> PathBuf {
-    let path_str = fs::read_to_string("assets/source_path.txt").expect("Unable to read file");
-    PathBuf::from(path_str.trim())
+fn read_source_info() -> (Option<PathBuf>, String) {
+    println!("Sto cercando di aprire il file source info");
+    if let Ok(info_str) = fs::read_to_string("assets/source_info.txt") {
+        let mut lines = info_str.lines();
+        let path_str = lines.next().unwrap_or("").trim();
+        if path_str.is_empty() {
+            return (None, "All types".to_string());
+        }
+        let file_type = lines.next().unwrap_or("All types").to_string();
+        (Some(PathBuf::from(path_str)), file_type)
+    } else {
+        println!("Non ho trovato il file");
+        (None, "All types".to_string())
+    }
+}
+
+fn get_file_extensions(path: &PathBuf) -> Vec<String> {
+    let mut extensions = HashSet::new();
+    extensions.insert("All types".to_string());
+
+    for entry in WalkDir::new(path) {
+        let entry = entry.unwrap();
+        if let Some(ext) = entry.path().extension().and_then(|e| e.to_str()) {
+            extensions.insert(ext.to_lowercase());
+        }
+    }
+
+    let mut extensions: Vec<String> = extensions.into_iter().collect();
+    extensions.sort();
+    extensions
 }
 
 fn get_usb_devices() -> Vec<PathBuf> {
@@ -129,16 +182,16 @@ fn get_free_space(path: &PathBuf) -> u64 {
 
 fn perform_backup() {
     println!("Starting backup..."); // Debug
-    let source_path = match read_source_path().as_path().to_str() {
-        Some(path_str) => PathBuf::from(path_str),
-        None => {
-            println!("Failed to read source path.");
-            return;
-        }
-    };
+    let (source_path, file_type) = read_source_info();
+    println!("File type: {}", file_type);
+
+    if source_path.is_none() {
+        println!("No source path found.");
+        return;
+    }
 
     let usb_devices = get_usb_devices();
-    println!("usb devices: {:?}", usb_devices);
+    println!("USB devices: {:?}", usb_devices);
     let mut max_free_space = 0;
     let mut selected_device = None;
 
@@ -149,15 +202,26 @@ fn perform_backup() {
             selected_device = Some(device);
         }
     }
-    println!("Selected device: {:?}, free_space: {:?}", selected_device, max_free_space);
+    println!("Selected device: {:?}, free space: {:?}", selected_device, max_free_space);
 
     if let Some(device) = selected_device {
+        let source_path = source_path.unwrap();
         let destination = device.join(source_path.file_name().unwrap());
 
         for entry in WalkDir::new(source_path.clone()) {
             let entry = entry.unwrap();
+            let path = entry.path();
+
+            if file_type != "All types" {
+                let ext = path.extension().and_then(|e| e.to_str()).unwrap_or("").to_lowercase();
+                if ext != file_type {
+                    continue;
+                }
+            }
+
             let dest_path = destination.join(entry.path().strip_prefix(source_path.clone()).unwrap_or_else(|_| Path::new("unknown")));
             println!("Destinazione: {:?}", dest_path);
+
             if entry.file_type().is_dir() {
                 println!("creato la cartella");
                 fs::create_dir_all(&dest_path).unwrap();
@@ -174,16 +238,17 @@ fn perform_backup() {
     }
 }
 
-pub fn run() {
+pub fn open_window() {
     let native_options = eframe::NativeOptions {
         ..Default::default()
     };
 
-    // eframe::run_native(
-    //     "Backup App",
-    //     native_options,
-    //     Box::new(|_cc| Ok(Box::new(MyApp::default()))),
-    // );
-
+    eframe::run_native(
+        "Backup App",
+        native_options,
+        Box::new(|_cc| Ok(Box::new(MyApp::default()))),
+    );
+}
+pub fn backup() {
     perform_backup();
 }
