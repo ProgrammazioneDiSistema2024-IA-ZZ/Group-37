@@ -10,7 +10,6 @@ fn main() {
    // Creo un thread per backup
    let backup_handle = thread::spawn(move || {
       while let Ok(received) = rx.recv() {
-         println!("Sono nel receiver");
          match received {
             1 => println!("Rettangolo riconosciuto"),
             2 => backup::backup(),
@@ -20,10 +19,9 @@ fn main() {
       }
    });
 
-   // Il detector deve stare sul main thread, non sono sicuro del perché
+   // Il detector deve stare sul main thread
    detector::run(tx);
 
-   // Ensure the backup thread has finished
    backup_handle.join().unwrap();
 
    // // Create Logger thread (no arguments needed)

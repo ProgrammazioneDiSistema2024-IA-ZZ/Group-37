@@ -14,11 +14,10 @@ path = "src/initialize.rs"
 
 [dependencies]
 rdev = "0.5"
-piston_window = "0.121.0"
-piston = "1.0.0"
 eframe = "0.28.1"
 rfd = "0.14.1"
 walkdir = "2.5.0"
+device_query = "2.1.0"
 [lib]
 name = "emergency_backup"
 path = "src/lib.rs"

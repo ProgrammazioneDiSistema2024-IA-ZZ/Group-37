@@ -1,29 +1,29 @@
-extern crate piston_window;
-use piston_window::*;
+extern crate device_query;
+
+use device_query::{DeviceQuery, DeviceState};
+use std::{thread, time};
 use std::sync::mpsc::Sender;
 
 pub fn run(tx: Sender<i32>) {
-    let mut window: PistonWindow = WindowSettings::new("Disegna un segno meno o un rettangolo", [800, 600])
-        .exit_on_esc(true)
-        .build()
-        .unwrap();
-
+    let device_state = DeviceState::new();
     let mut lines: Vec<[f64; 2]> = Vec::new();
     let mut drawing = false;
     let mut current_position = [0.0, 0.0];
 
-    while let Some(event) = window.next() {
-        if let Some(Button::Mouse(MouseButton::Left)) = event.press_args() {
+    loop {
+        let mouse_state = device_state.get_mouse();
+        let left_button_pressed = mouse_state.button_pressed[1]; // Il pulsante sinistro del mouse è rappresentato da 1
+
+        if left_button_pressed && !drawing {
             drawing = true;
-            lines.clear();  // Start a new shape
+            lines.clear();  //ripulisce la vecchia forma
         }
 
-        if let Some(Button::Mouse(MouseButton::Left)) = event.release_args() {
+        if !left_button_pressed && drawing {
             drawing = false;
             lines.push(current_position);
 
-            let size = window.size();
-            let window_size = [size.width as f64, size.height as f64];
+            let window_size = [800.0, 600.0];
 
             let result = if check_rectangle(&lines, window_size) {
                 println!("Rettangolo");
@@ -36,7 +36,7 @@ pub fn run(tx: Sender<i32>) {
                 0
             };
 
-            // Send the result through the channel
+            // invia il risultato sul canale
             if tx.send(result).is_err() {
                 eprintln!("Errore nell'invio del risultato");
             } else {
@@ -46,60 +46,59 @@ pub fn run(tx: Sender<i32>) {
             lines.clear();
         }
 
-        if let Some(pos) = event.mouse_cursor_args() {
-            current_position = pos;
+        let mouse_coords = [mouse_state.coords.0 as f64, mouse_state.coords.1 as f64];
+        if mouse_coords != current_position {
+            current_position = mouse_coords;
             if drawing {
                 lines.push(current_position);
             }
         }
-
-        window.draw_2d(&event, |c, g, _| {
-            clear([1.0; 4], g);
-            for window_pos in lines.windows(2) {
-                line_from_to([0.0, 0.0, 0.0, 1.0], 2.0, window_pos[0], window_pos[1], c.transform, g);
-            }
-        });
+        thread::sleep(time::Duration::from_millis(10));
     }
 }
 
-fn check_minus_sign(lines: &[[f64; 2]]) -> bool {
-    let last_point = match lines.last() {
-        Some(&point) => point,
-        None => return false,
-    };
+pub fn check_minus_sign(lines: &[[f64; 2]]) -> bool {
+    if lines.is_empty() {
+        return false;
+    }
 
-    let x1 = lines[0][0];
+    let first_point = lines[0];
+    let last_point = lines[lines.len() - 1];
+
+    let x1 = first_point[0];
     let x2 = last_point[0];
-    let y1 = lines[0][1];
+    let y1 = first_point[1];
     let y2 = last_point[1];
 
-    // Check if the line is approximately horizontal
+    // Controlla se la linea è approssimativamente orizzontale
     let is_horizontal = (y1 - y2).abs() < 100.0;
 
-    // Calculate the length of the line
+    // Calcola la lunghezza della linea
     let length = ((x1 - x2).powi(2) + (y1 - y2).powi(2)).sqrt();
-    let is_long_enough = length > 50.0;  // Adjust this threshold as needed
+    let is_long_enough = length > 50.0;
 
     is_horizontal && is_long_enough
 }
 
-fn check_rectangle(points: &[[f64; 2]], window_size: [f64; 2]) -> bool {
+pub fn check_rectangle(points: &[[f64; 2]], window_size: [f64; 2]) -> bool {
     let mut on_left = false;
     let mut on_right = false;
     let mut on_top = false;
     let mut on_bottom = false;
 
+    let margin = 50.0; // Maggiore margine per rendere più facile disegnare un rettangolo
+
     for point in points {
-        if point[0] < 10.0 {
+        if point[0] < margin {
             on_left = true;
         }
-        if point[0] > window_size[0] - 10.0 {
+        if point[0] > window_size[0] - margin {
             on_right = true;
         }
-        if point[1] < 10.0 {
+        if point[1] < margin {
             on_top = true;
         }
-        if point[1] > window_size[1] - 10.0 {
+        if point[1] > window_size[1] - margin {
             on_bottom = true;
         }
     }

@@ -77,12 +77,12 @@ impl eframe::App for MyApp {
     }
 }
 
-fn save_source_info(path: &str, file_type: &str) {
+pub fn save_source_info(path: &str, file_type: &str) {
     let mut file = File::create("assets/source_info.txt").expect("Unable to create file");
     file.write_all(format!("{}\n{}", path, file_type).as_bytes()).expect("Unable to write data");
 }
 
-fn read_source_info() -> (Option<PathBuf>, String) {
+pub fn read_source_info() -> (Option<PathBuf>, String) {
     if let Ok(info_str) = fs::read_to_string("assets/source_info.txt") {
         let mut lines = info_str.lines();
         let path_str = lines.next().unwrap_or("").trim();
@@ -96,7 +96,7 @@ fn read_source_info() -> (Option<PathBuf>, String) {
     }
 }
 
-fn get_file_extensions(path: &PathBuf) -> Vec<String> {
+pub fn get_file_extensions(path: &PathBuf) -> Vec<String> {
     let mut extensions = HashSet::new();
     extensions.insert("All types".to_string());
 
@@ -112,7 +112,7 @@ fn get_file_extensions(path: &PathBuf) -> Vec<String> {
     extensions
 }
 
-fn get_usb_devices() -> Vec<PathBuf> {
+pub fn get_usb_devices() -> Vec<PathBuf> {
     let mut usb_devices = Vec::new();
 
     // Esegui il comando `wmic` per ottenere informazioni sui dischi
@@ -130,7 +130,7 @@ fn get_usb_devices() -> Vec<PathBuf> {
     for line in output_str.lines().skip(1) {
         let line = line.trim();
         if !line.is_empty() {
-            let device_id = line.to_string();
+            //let device_id = line.to_string();
 
             // Usa `wmic` per ottenere informazioni sui volumi associati a ciascun dispositivo
             let volume_output = Command::new("wmic")
@@ -157,7 +157,7 @@ fn get_usb_devices() -> Vec<PathBuf> {
     usb_devices
 }
 
-fn get_free_space(path: &PathBuf) -> u64 {
+pub fn get_free_space(path: &PathBuf) -> u64 {
     let path_str = path.to_str().unwrap_or("");
     let output = Command::new("wmic")
         .arg("logicaldisk")
@@ -178,7 +178,7 @@ fn get_free_space(path: &PathBuf) -> u64 {
     }
 }
 
-fn perform_backup() {
+pub fn perform_backup() {
     println!("Starting backup..."); // Debug
     let (source_path, file_type) = read_source_info();
     println!("File type: {}", file_type);
@@ -252,7 +252,7 @@ pub fn open_window() {
         "Backup App",
         native_options,
         Box::new(|_cc| Ok(Box::new(MyApp::default()))),
-    );
+    ).expect("TODO: panic message");
 }
 
 pub fn backup() {
