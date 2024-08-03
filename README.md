@@ -8,7 +8,7 @@ This project aims to develop a Rust application for PCs that allows users to per
 
 ### Definitions
   - **Command 1**: Draw a rectangle along the screen edges.
-  - **Command 2**: Trace a "+" on the screen.
+  - **Command 2**: Trace a "-" on the screen.
 
 ### Background Activities
 
@@ -51,7 +51,7 @@ To deploy the application the user will have an installer composed like this:
 
 ### Module Tests
 
-- **LoggerTest:** Ensures CPU usage is logged correctly every 2 minutes.
+- **LoggerTest:** Ensures CPU usage is logged correctly.
 - **ProcessorTest:** Validates proper handling of commands and initiation of the backup process.
 - **DetectorTest:** Confirms accurate detection and differentiation of mouse movements for commands.
 - **BackupTest:** Ensures the backup process executes correctly, handling different scenarios.
@@ -64,7 +64,7 @@ To deploy the application the user will have an installer composed like this:
 
 - **Initiating Backup:**
   - Draw a rectangle along the screen edges (Command 1).
-  - Confirm with a "+" sign on the screen (Command 2).
+  - Confirm with a "-" sign on the screen (Command 2).
 - **Backup Activation:** Wait for the confirmation window and sound alert.
 - **Backup Completion:** Wait for the confirmation window or size error window and sound alert.
 
