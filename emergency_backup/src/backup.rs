@@ -4,6 +4,7 @@ use std::fs::{self, File};
 use std::io::{Write, copy};
 use std::path::{PathBuf, Path};
 use std::process::Command;
+use std::time::Instant;
 use walkdir::WalkDir;
 use rfd::FileDialog; // Per la selezione di file e directory
 
@@ -214,6 +215,9 @@ pub fn perform_backup() {
             }
         }
 
+        let start_time = Instant::now();
+        let mut total_size = 0;
+
         for entry in WalkDir::new(source_path.clone()) {
             let entry = entry.unwrap();
             let path = entry.path();
@@ -233,11 +237,23 @@ pub fn perform_backup() {
             } else {
                 let mut src_file = File::open(entry.path()).unwrap();
                 let mut dest_file = File::create(dest_path).unwrap();
-                copy(&mut src_file, &mut dest_file).unwrap();
+                let size = copy(&mut src_file, &mut dest_file).unwrap();
+                total_size += size;
             }
         }
 
-        println!("Backup completed successfully.");
+        let elapsed_time = start_time.elapsed();
+        let total_size_mb = total_size as f64 / (1024.0 * 1024.0);
+        let log_content = format!(
+            "Backup completed successfully.\nTotal size: {} bytes ({:.2} MB)\nElapsed time: {:.2?} seconds\n",
+            total_size, total_size_mb, elapsed_time
+        );
+
+        let log_file_path = destination.join("backup_log.txt");
+        let mut log_file = File::create(log_file_path).expect("Unable to create log file");
+        log_file.write_all(log_content.as_bytes()).expect("Unable to write log data");
+
+        println!("{}", log_content);
     } else {
         println!("No USB device found with enough space.");
     }
