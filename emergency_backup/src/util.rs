@@ -1,62 +1,78 @@
-use std::sync::{Arc, Mutex};
-
+use eframe::egui;
+use eframe::egui::CentralPanel;
+use std::time::Instant;
 use win_beep;
-use fltk::{app, button::Button,enums::Color, frame::Frame, prelude::*, window::Window};
 
-pub enum Sound {
-    Error,
-    Info,
+pub struct MyApp {
+    text: String,
+    start_time: Instant,
 }
 
-impl Sound {
-    pub fn play(&self) {
-        match self {
-            Sound::Error => {
-                win_beep::beep_with_hz_and_millis(200, 500);
-            }
-            Sound::Info => {
-                win_beep::beep_with_hz_and_millis(400, 300);
-            }
+impl MyApp {
+    pub fn new(text: &str) -> Self {
+        Self {
+            text: text.to_owned(),
+            start_time: Instant::now(),
         }
     }
 }
 
-// Customizable pop-up that automatically closes after 10s if the user doesn't click the button
-pub fn popup(title: &str, text: &str, sound: Sound) {
-    // Emit sound
-    sound.play();
+impl eframe::App for MyApp {
+    fn update(&mut self, ctx: &egui::Context, _: &mut eframe::Frame) {
+        let elapsed = self.start_time.elapsed().as_secs() as i32;
+        let remaining_time = 10_i32.saturating_sub(elapsed);
+        let display_text = format!("{} ({})", self.text, remaining_time);
 
-    //Create confirmation pop-up
-    let app = app::App::default();
-    let mut wind = Window::new(100, 100, 300, 100, title);
-    wind.set_color(Color::White);  
-    let _frame = Frame::new(20, 20, 260, 30, text);
-    let mut but = Button::new(125, 60, 50, 25, "OK");
-    but.set_color(Color::White);
+        CentralPanel::default().show(ctx, |ui| {
+            ui.label(display_text+"\n");
+            if ui.button("  OK  ").clicked() {
+                std::process::exit(0);
+            }
+        });
 
-    let quit_flag = Arc::new(Mutex::new(false));
-    let quit_flag_clone = Arc::clone(&quit_flag);
-
-    but.set_callback({
-        let appc = app.clone();
-        let quit_flag = Arc::clone(&quit_flag);
-        move |_| {
-            let mut flag = quit_flag.lock().unwrap();
-            *flag = true; //The button was clicked
-            appc.quit();
+        // Check if the timer has expired
+        if remaining_time == 0 {
+            std::process::exit(0);
         }
-    });
 
-    app::add_timeout3(10.0, {
-        let appc = app.clone();
-        move |_| {
-            let flag = quit_flag_clone.lock().unwrap();
-            //Close the pop-up if the user didn't click OK
-            if !*flag {appc.quit(); }
+        ctx.request_repaint();
+    }
+}
+
+pub fn popup(title: &str, text: &str, sound: &str){
+    let _ = std::process::Command::new("popup")
+            .arg(title)
+            .arg(text)
+            .arg(sound)
+            .output()
+            .expect("Failed to execute process");
+}
+
+fn main() {
+    let args: Vec<String> = std::env::args().collect();
+    if args.len() != 4 {
+        eprintln!("Usage: {} <title> <text> <sound>", args[0]);
+        eprintln!("Sound options: 'error' , 'info', 'none' ");
+        std::process::exit(1);
+    }
+
+    let title = &args[1];
+    let text = &args[2];
+    match args[3].as_str() {
+        "error" => win_beep::beep_with_hz_and_millis(200, 500),
+        "info" => win_beep::beep_with_hz_and_millis(400, 300),
+        _ => {
+            eprintln!("Invalid sound option.");
         }
-    });
+    };
 
-    wind.end();
-    wind.show();
-    app.run().unwrap();
+    let app = MyApp::new(text);
+    let options = eframe::NativeOptions {
+        viewport: egui::ViewportBuilder::default().with_inner_size([280 as f32, 100 as f32]),
+        ..Default::default()
+    };
+    let _ = eframe::run_native(
+        title, 
+        options, 
+        Box::new(|_cc| Ok(Box::new(app))));
 }

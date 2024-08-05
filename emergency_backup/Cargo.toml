@@ -1,7 +1,7 @@
-    [package]
-    name = "emergency_backup"
-    version = "0.1.0"
-    edition = "2021"
+[package]
+name = "emergency_backup"
+version = "0.1.0"
+edition = "2021"
 
 [[bin]]
 name = "main_app"
@@ -11,6 +11,10 @@ path = "src/main.rs"
 name = "initialize_app"
 path = "src/initialize.rs"
 
+[[bin]]
+name = "popup"
+path = "src/util.rs"
+
 [dependencies]
 rdev = "0.5"
 eframe = "0.28.1"
@@ -19,7 +23,6 @@ walkdir = "2.5.0"
 device_query = "2.1.0"
 chrono = "0.4.38"
 ctrlc = "3.4.4"
-fltk = "1.4.33"
 serial_test = "3.1.1"
 sysinfo = "0.30.13"
 win-beep = "1.0.3"
