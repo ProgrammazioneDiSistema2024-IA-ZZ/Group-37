@@ -18,10 +18,8 @@ Source: "initialize_app.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "assets\*"; DestDir: "{app}\assets"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-; Crea i collegamenti nel menu Start e sul desktop
-Name: "{group}\Main"; Filename: "{app}\main_app.exe"
+; Crea solo il collegamento per initialize_app.exe
 Name: "{group}\Initializer"; Filename: "{app}\initialize_app.exe"
-Name: "{userdesktop}\Emergency Backup Main"; Filename: "{app}\main_app.exe"
 Name: "{userdesktop}\Emergency Backup Initializer"; Filename: "{app}\initialize_app.exe"
 
 [Registry]
@@ -38,10 +36,8 @@ Type: filesandordirs; Name: "{app}\assets\*"
 Type: filesandordirs; Name: "{app}"
 
 [Icons]
-; Rimuove i collegamenti durante la disinstallazione
-Name: "{group}\Main"; Filename: "{app}\main_app.exe"; 
+; Rimuove solo il collegamento per initialize_app.exe durante la disinstallazione
 Name: "{group}\Initializer"; Filename: "{app}\initialize_app.exe"; 
-Name: "{userdesktop}\Emergency Backup Main"; Filename: "{app}\main_app.exe"; 
 Name: "{userdesktop}\Emergency Backup Initializer"; Filename: "{app}\initialize_app.exe";
 
 [Registry]
