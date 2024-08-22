@@ -104,8 +104,9 @@ impl Processor {
 
     //After receiving command 1 and command 2 notify the user with a pop-up
     fn show_popup() {
-        util::popup("Conferma Backup","Il backup verrà avviato alla chiusura di questo pop-up.", "info");
+        util::popup("Conferma Backup", "Il backup verrà avviato alla chiusura di questo pop-up.", "info");
     }
+
 
     fn start_backup_procedure() {
         // Create Backup thread 

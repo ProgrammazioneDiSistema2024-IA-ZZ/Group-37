@@ -1,12 +1,12 @@
 use std::sync::mpsc;
 use std::thread;
 use std::time::Duration;
-
+use emergency_backup::util;
 use emergency_backup::detector;
 use emergency_backup::logger::Logger;
 use emergency_backup::processor::Processor;
 
-fn main() { 
+fn main() {
    // Initialize the mpsc channel
    let (tx, rx) = mpsc::channel();
 
