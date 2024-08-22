@@ -13,18 +13,20 @@ PrivilegesRequired=admin
 
 [Files]
 ; Specifica i file da installare
-Source: "main_app.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "EmergencyBackup.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "initialize_app.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "popup.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "assets\*"; DestDir: "{app}\assets"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "assets\icona.ico"; DestDir: "{app}\assets"; Flags: ignoreversion
 
 [Icons]
-; Crea solo il collegamento per initialize_app.exe
-Name: "{group}\Initializer"; Filename: "{app}\initialize_app.exe"
-Name: "{userdesktop}\Emergency Backup Initializer"; Filename: "{app}\initialize_app.exe"
+; Crea solo il collegamento per initialize_app.exe con l'icona personalizzata
+Name: "{group}\Initializer"; Filename: "{app}\initialize_app.exe"; IconFilename: "{app}\assets\icona.ico"
+Name: "{userdesktop}\Emergency Backup Initializer"; Filename: "{app}\initialize_app.exe"; IconFilename: "{app}\assets\icona.ico"
 
 [Registry]
-; Aggiunge la voce di avvio automatico per main_app.exe
-Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueData: """{app}\main_app.exe"""; Flags: uninsdeletevalue
+; Aggiunge la voce di avvio automatico per EmergencyBackup.exe
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueData: """{app}\EmergencyBackup.exe"""; Flags: uninsdeletevalue
 
 [Run]
 ; Avvia `initialize_app.exe` dopo l'installazione
@@ -37,8 +39,8 @@ Type: filesandordirs; Name: "{app}"
 
 [Icons]
 ; Rimuove solo il collegamento per initialize_app.exe durante la disinstallazione
-Name: "{group}\Initializer"; Filename: "{app}\initialize_app.exe"; 
-Name: "{userdesktop}\Emergency Backup Initializer"; Filename: "{app}\initialize_app.exe";
+Name: "{group}\Initializer"; Filename: "{app}\initialize_app.exe"; IconFilename: "{app}\assets\icona.ico"
+Name: "{userdesktop}\Emergency Backup Initializer"; Filename: "{app}\initialize_app.exe"; IconFilename: "{app}\assets\icona.ico"
 
 [Registry]
 ; Rimuove la voce di avvio automatico e la voce di disinstallazione
