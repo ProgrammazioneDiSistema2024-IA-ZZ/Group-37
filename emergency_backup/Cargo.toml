@@ -27,7 +27,8 @@ serial_test = "3.1.1"
 sysinfo = "0.30.13"
 win-beep = "1.0.3"
 winapi = { version = "0.3", features = ["winbase", "consoleapi", "winuser", "wincon"] }
-
+tempfile = "3.12.0"
+mockall = "0.13.0"
 
 [lib]
 name = "emergency_backup"

@@ -97,7 +97,7 @@ pub fn read_source_info() -> (Option<PathBuf>, String) {
     }
 }
 
-pub fn get_file_extensions(path: &PathBuf) -> Vec<String> {
+pub fn get_file_extensions(path: &Path) -> Vec<String> {
     let mut extensions = HashSet::new();
     extensions.insert("All types".to_string());
 
