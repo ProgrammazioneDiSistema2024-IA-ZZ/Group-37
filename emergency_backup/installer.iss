@@ -2,8 +2,8 @@
 ; Nome del setup
 AppName=Emergency Backup
 AppVersion=1.0
-;DefaultDirName={userdesktop}\EmergencyBackup
-DefaultDirName={pf}\EmergencyBackup
+;DefaultDirName={pf}\EmergencyBackup
+DefaultDirName={userdesktop}\EmergencyBackup
 DefaultGroupName=Emergency Backup
 AllowNoIcons=yes
 OutputDir=.
@@ -31,7 +31,7 @@ Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: 
 
 [Run]
 ; Avvia `initialize_app.exe` dopo l'installazione
-Filename: "{app}\initialize_app.exe"; Description: "Start Emergency Backup Initializer"; Flags: nowait postinstall
+Filename: "{app}\initialize_app.exe"; Description: "Start Emergency Backup Initializer"; Flags: runascurrentuser nowait postinstall
 
 [UninstallDelete]
 ; Rimuove i file e le directory durante la disinstallazione
