@@ -2,8 +2,6 @@ use eframe::egui;
 use eframe::egui::CentralPanel;
 use std::time::Instant;
 use win_beep;
-use winapi::um::wincon::GetConsoleWindow;
-use winapi::um::winuser::{ShowWindow, SW_HIDE};
 
 pub struct MyApp {
     text: String,
@@ -41,21 +39,13 @@ impl eframe::App for MyApp {
     }
 }
 
-pub fn popup(title: &str, text: &str, _sound: &str) {
-    rfd::MessageDialog::new()
-        .set_title(title)
-        .set_description(text)
-        .set_buttons(rfd::MessageButtons::Ok)
-        .show();
-}
-
-pub fn hide_console() {
-    unsafe {
-        let console_window = GetConsoleWindow();
-        if !console_window.is_null() {
-            ShowWindow(console_window, SW_HIDE);
-        }
-    }
+pub fn popup(title: &str, text: &str, sound: &str){
+    let _ = std::process::Command::new("popup")
+        .arg(title)
+        .arg(text)
+        .arg(sound)
+        .output()
+        .expect("Failed to execute process");
 }
 
 fn main() {
@@ -82,8 +72,7 @@ fn main() {
         ..Default::default()
     };
     let _ = eframe::run_native(
-        title, 
-        options, 
+        title,
+        options,
         Box::new(|_cc| Ok(Box::new(app))));
 }
-

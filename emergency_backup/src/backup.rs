@@ -6,7 +6,8 @@ use std::path::{PathBuf, Path};
 use std::process::Command;
 use std::time::Instant;
 use walkdir::WalkDir;
-use rfd::FileDialog; // Per la selezione di file e directory
+use rfd::FileDialog;
+use std::env;
 
 struct MyApp {
     source_path: Option<PathBuf>,
@@ -78,13 +79,33 @@ impl eframe::App for MyApp {
     }
 }
 
+pub fn get_absolute_path(relative_path: &str) -> PathBuf {
+    let relative_path = PathBuf::from(relative_path);
+    println!("risultato di current_exe: {:?}", env::current_exe());
+
+    let exe_path = env::current_exe().expect("Failed to get current exe path");
+    let mut exe_dir = exe_path.parent().expect("Failed to get parent directory").to_path_buf();
+
+    // Verifica se exe_path termina con \\target\\debug\\initialize_app.exe o \\target\\release\\initialize_app.exe
+    if exe_dir.ends_with("target/debug") || exe_dir.ends_with("target/release") {
+        // Risale di due directory per rimuovere target/debug o target/release
+        exe_dir.pop(); // Rimuove "debug" o "release"
+        exe_dir.pop(); // Rimuove "target"
+    }
+
+    exe_dir.join(relative_path)
+}
+
 pub fn save_source_info(path: &str, file_type: &str) {
-    let mut file = File::create("assets/source_info.txt").expect("Unable to create file");
+    let file_path = get_absolute_path("assets/source_info.txt");
+    println!("il file path nella funzione è {:?}", file_path);
+    let mut file = File::create(file_path).expect("Unable to create file");
     file.write_all(format!("{}\n{}", path, file_type).as_bytes()).expect("Unable to write data");
 }
 
 pub fn read_source_info() -> (Option<PathBuf>, String) {
-    if let Ok(info_str) = fs::read_to_string("assets/source_info.txt") {
+    let file_path = get_absolute_path("assets/source_info.txt");
+    if let Ok(info_str) = fs::read_to_string(file_path) {
         let mut lines = info_str.lines();
         let path_str = lines.next().unwrap_or("").trim();
         if path_str.is_empty() {

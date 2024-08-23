@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [[bin]]
-name = "main_app"
+name = "EmergencyBackup"
 path = "src/main.rs"
 
 [[bin]]
