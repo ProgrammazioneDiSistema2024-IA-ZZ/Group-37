@@ -29,6 +29,7 @@ win-beep = "1.0.3"
 winapi = { version = "0.3", features = ["winbase", "consoleapi", "winuser", "wincon"] }
 tempfile = "3.12.0"
 mockall = "0.13.0"
+enigo = "0.2.1"
 
 [lib]
 name = "emergency_backup"
