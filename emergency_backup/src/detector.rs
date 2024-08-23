@@ -54,6 +54,8 @@ pub fn run(tx: Sender<i32>) {
             }
         }
         thread::sleep(time::Duration::from_millis(10));
+
+        if tx.send(0).is_err() {return};
     }
 }
 

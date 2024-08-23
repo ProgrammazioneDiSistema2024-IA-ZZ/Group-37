@@ -33,7 +33,7 @@ impl Processor {
                     Ok(command) => match command {
                         1 => Processor::command1_received(&c1_received_clone),
                         2 => Processor::command2_received(&c1_received_clone),
-                        _ => println!("[PROCESSOR] Command not recognized."),
+                        _ => {}
                     },
                     Err(mpsc::RecvTimeoutError::Timeout) => {
                         // Check if stop signal is set
