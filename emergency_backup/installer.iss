@@ -2,7 +2,8 @@
 ; Nome del setup
 AppName=Emergency Backup
 AppVersion=1.0
-DefaultDirName={userdesktop}\EmergencyBackup
+;DefaultDirName={userdesktop}\EmergencyBackup
+DefaultDirName={pf}\EmergencyBackup
 DefaultGroupName=Emergency Backup
 AllowNoIcons=yes
 OutputDir=.
