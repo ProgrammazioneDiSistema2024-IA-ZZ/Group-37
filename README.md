@@ -2,13 +2,13 @@
 
 ## Project Overview
 
-This project aims to develop a Rust application for PCs that allows users to perform backups even when the screen is not operable. The application facilitates backups to an external drive (e.g., USB flash drive) using specific mouse commands. It is designed to run in the background with minimal CPU usage and is installed during the PC's bootstrap process.
+This project aims to develop a Rust application for PCs that allows users to perform backups even when the screen is not operable. The application facilitates backups to an external drive (i.e., USB flash drive) using specific mouse commands. It is designed to run in the background with minimal CPU usage.
 
 ## Application Structure
 
 ### Definitions
   - **Command 1**: Draw a rectangle along the screen edges.
-  - **Command 2**: Trace a "+" on the screen.
+  - **Command 2**: Trace a "-" on the screen.
 
 ### Background Activities
 
@@ -35,23 +35,20 @@ In the **main()** function of our application happens the channel and threads in
 ![Main Activities](images/main_activity.png)
 
 ## Installer
-To deploy the application the user will have an installer composed like this:
-1. **Setup Screen:**
-   - Brief description of the application.
-2. **Configuration Screen**
-   - Configuration of backup type:
-     - Choose root folder for the backup[Browse].
-     - Select "Entire folder content" or "Specific file types".
-3. **Install Screen**
-    - Final installation process.
+To deploy the application the user will have an installer.
 
-**Automatic Startup:** The installer will configure the program to run at system startup.
+**Automatic Startup:** The installer will configure the program to run at system startup.<br>
+
+**Emergency Backup Initializer**:
+The user will have the possibility to configure the backup by:
+   - Choosing root folder for the backup[Browse].
+   - Selecting "Entire folder content" or a "Specific file type".
 
 ## Testing
 
 ### Module Tests
 
-- **LoggerTest:** Ensures CPU usage is logged correctly every 2 minutes.
+- **LoggerTest:** Ensures CPU usage is logged correctly.
 - **ProcessorTest:** Validates proper handling of commands and initiation of the backup process.
 - **DetectorTest:** Confirms accurate detection and differentiation of mouse movements for commands.
 - **BackupTest:** Ensures the backup process executes correctly, handling different scenarios.
@@ -64,9 +61,9 @@ To deploy the application the user will have an installer composed like this:
 
 - **Initiating Backup:**
   - Draw a rectangle along the screen edges (Command 1).
-  - Confirm with a "+" sign on the screen (Command 2).
+  - Confirm with a "-" sign on the screen (Command 2).
 - **Backup Activation:** Wait for the confirmation window and sound alert.
-- **Backup Completion:** Wait for the confirmation window or size error window and sound alert.
+- **Backup Completion:** Check the content of the USB.
 
 ## Logs and Performance
 
